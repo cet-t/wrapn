@@ -1,0 +1,10 @@
+[package]
+name = "wrapn"
+version = "0.1.0"
+edition = "2024"
+authors = ["cet-t"]
+license = "MIT"
+repository = "https://github.com/cet-t/wrapn"
+description = "A wrapping numeric type with ergonomic operator overloading for Rust"
+
+[dependencies]
