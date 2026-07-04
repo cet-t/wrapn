@@ -5,10 +5,11 @@
 ## Example
 
 ```rust
-use wrapn::Wrap;
+use wrapn::{Wrap, wrap};
 
 let a = Wrap::new(5u32);
 let b = 3u32;
+let score = wrap!(10u32);
 
 // arithmetic with plain integers
 assert_eq!(a + b, Wrap::new(8u32));
@@ -29,7 +30,9 @@ assert_eq!(!Wrap::new(0b1111u32), Wrap::new(!0b1111u32));
 - Bitwise: `&`, `|`, `^`, plus assign variants
 - Shifts: `<<`, `>>`, plus assign variants
 - Unary: `-`, `!`
+- Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=` against `T`
 - Conversions: `From<T>`, `From<Wrapping<T>>`, `From<Wrap<T>> for Wrapping<T>`
+- Accessors: `into_inner()`, `raw()`
 - Traits: `Debug`, `Clone`, `Copy`, `PartialEq`, `Eq`, `PartialOrd`, `Ord`, `Hash`, `Display`
 
 ## License

@@ -1,7 +1,7 @@
 use std::{
     fmt::{self, Display, Formatter},
-    ops::*,
     num::Wrapping,
+    ops::*,
 };
 
 /// Trait for types that support wrapping arithmetic operations.
@@ -35,113 +35,132 @@ num_impl! {
 }
 
 macro_rules! wrap_binary {
-    ($trait:ident, $method:ident, $wrapping:ident) => {
-        impl<T: Copy + Num> $trait<Wrap<T>> for Wrap<T> {
-            type Output = Wrap<T>;
-            fn $method(self, rhs: Wrap<T>) -> Self::Output {
-                Wrap(Wrapping(self.0 .0.$wrapping(rhs.0 .0)))
+    ($name:ident) => {
+        ::paste::paste! {
+            impl<T: Copy + Num> [<$name>]<Wrap<T>> for Wrap<T> {
+                type Output = Wrap<T>;
+                fn [<$name:lower>](self, rhs: Wrap<T>) -> Self::Output {
+                    Wrap(Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs.0 .0)))
+                }
             }
-        }
-        impl<T: Copy + Num> $trait<T> for Wrap<T> {
-            type Output = Wrap<T>;
-            fn $method(self, rhs: T) -> Self::Output {
-                Wrap(Wrapping(self.0 .0.$wrapping(rhs)))
+            impl<T: Copy + Num> [<$name>]<T> for Wrap<T> {
+                type Output = Wrap<T>;
+                fn [<$name:lower>](self, rhs: T) -> Self::Output {
+                    Wrap(Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs)))
+                }
             }
         }
     };
 }
-
-wrap_binary!(Add, add, wrapping_add);
-wrap_binary!(Sub, sub, wrapping_sub);
-wrap_binary!(Mul, mul, wrapping_mul);
-wrap_binary!(Div, div, wrapping_div);
-wrap_binary!(Rem, rem, wrapping_rem);
 
 macro_rules! wrap_binary_assign {
-    ($trait:ident, $method:ident, $wrapping:ident) => {
-        impl<T: Copy + Num> $trait<Wrap<T>> for Wrap<T> {
-            fn $method(&mut self, rhs: Wrap<T>) {
-                self.0 = Wrapping(self.0 .0.$wrapping(rhs.0 .0));
+    ($name:ident) => {
+        ::paste::paste! {
+            impl<T: Copy + Num> [<$name Assign>]<Wrap<T>> for Wrap<T> {
+                fn [<$name:lower _assign>](&mut self, rhs: Wrap<T>) {
+                    self.0 = Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs.0 .0));
+                }
             }
-        }
-        impl<T: Copy + Num> $trait<T> for Wrap<T> {
-            fn $method(&mut self, rhs: T) {
-                self.0 = Wrapping(self.0 .0.$wrapping(rhs));
+            impl<T: Copy + Num> [<$name Assign>]<T> for Wrap<T> {
+                fn [<$name:lower _assign>](&mut self, rhs: T) {
+                    self.0 = Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs));
+                }
             }
         }
     };
 }
 
-wrap_binary_assign!(AddAssign, add_assign, wrapping_add);
-wrap_binary_assign!(SubAssign, sub_assign, wrapping_sub);
-wrap_binary_assign!(MulAssign, mul_assign, wrapping_mul);
-wrap_binary_assign!(DivAssign, div_assign, wrapping_div);
-wrap_binary_assign!(RemAssign, rem_assign, wrapping_rem);
+wrap_binary!(Add);
+wrap_binary!(Sub);
+wrap_binary!(Mul);
+wrap_binary!(Div);
+wrap_binary!(Rem);
+
+wrap_binary_assign!(Add);
+wrap_binary_assign!(Sub);
+wrap_binary_assign!(Mul);
+wrap_binary_assign!(Div);
+wrap_binary_assign!(Rem);
 
 macro_rules! wrap_bit_binary {
-    ($trait:ident, $method:ident, $op:tt) => {
-        impl<T: Copy + $trait<Output = T>> $trait<Wrap<T>> for Wrap<T> {
-            type Output = Wrap<T>;
-            fn $method(self, rhs: Wrap<T>) -> Self::Output {
-                Wrap(Wrapping(self.0 .0 $op rhs.0 .0))
+    ($name:ident, $op:tt) => {
+        ::paste::paste! {
+            impl<T: Copy + $name<Output = T>> $name<Wrap<T>> for Wrap<T> {
+                type Output = Wrap<T>;
+                fn [<$name:lower>](self, rhs: Wrap<T>) -> Self::Output {
+                    Wrap(Wrapping(self.0 .0 $op rhs.0 .0))
+                }
             }
-        }
-        impl<T: Copy + $trait<Output = T>> $trait<T> for Wrap<T> {
-            type Output = Wrap<T>;
-            fn $method(self, rhs: T) -> Self::Output {
-                Wrap(Wrapping(self.0 .0 $op rhs))
+            impl<T: Copy + $name<Output = T>> $name<T> for Wrap<T> {
+                type Output = Wrap<T>;
+                fn [<$name:lower>](self, rhs: T) -> Self::Output {
+                    Wrap(Wrapping(self.0 .0 $op rhs))
+                }
             }
         }
     };
 }
-
-wrap_bit_binary!(BitAnd, bitand, &);
-wrap_bit_binary!(BitOr, bitor, |);
-wrap_bit_binary!(BitXor, bitxor, ^);
 
 macro_rules! wrap_bit_binary_assign {
-    ($bound:ident, $trait:ident, $method:ident, $op:tt) => {
-        impl<T: Copy + $bound<Output = T>> $trait<Wrap<T>> for Wrap<T> {
-            fn $method(&mut self, rhs: Wrap<T>) {
-                self.0 = Wrapping(self.0 .0 $op rhs.0 .0);
+    ($name:ident, $op:tt) => {
+        ::paste::paste! {
+            impl<T: Copy + $name<Output = T>> [<$name Assign>]<Wrap<T>> for Wrap<T> {
+                fn [<$name:lower _assign>](&mut self, rhs: Wrap<T>) {
+                    self.0 = Wrapping(self.0 .0 $op rhs.0 .0);
+                }
             }
-        }
-        impl<T: Copy + $bound<Output = T>> $trait<T> for Wrap<T> {
-            fn $method(&mut self, rhs: T) {
-                self.0 = Wrapping(self.0 .0 $op rhs);
+            impl<T: Copy + $name<Output = T>> [<$name Assign>]<T> for Wrap<T> {
+                fn [<$name:lower _assign>](&mut self, rhs: T) {
+                    self.0 = Wrapping(self.0 .0 $op rhs);
+                }
             }
         }
     };
 }
 
-wrap_bit_binary_assign!(BitAnd, BitAndAssign, bitand_assign, &);
-wrap_bit_binary_assign!(BitOr, BitOrAssign, bitor_assign, |);
-wrap_bit_binary_assign!(BitXor, BitXorAssign, bitxor_assign, ^);
+wrap_bit_binary!(BitAnd, &);
+wrap_bit_binary!(BitOr, |);
+wrap_bit_binary!(BitXor, ^);
+
+wrap_bit_binary_assign!(BitAnd, &);
+wrap_bit_binary_assign!(BitOr, |);
+wrap_bit_binary_assign!(BitXor, ^);
 
 macro_rules! wrap_shift {
-    ($trait:ident, $method:ident, $assign_trait:ident, $assign_method:ident, $op:tt) => {
-        impl<T, U> $trait<U> for Wrap<T>
-        where
-            T: $trait<U, Output = T>,
-        {
-            type Output = Wrap<T>;
-            fn $method(self, rhs: U) -> Self::Output {
-                Wrap(Wrapping(self.0 .0 $op rhs))
-            }
-        }
-        impl<T, U> $assign_trait<U> for Wrap<T>
-        where
-            T: Copy + $trait<U, Output = T>,
-        {
-            fn $assign_method(&mut self, rhs: U) {
-                self.0 = Wrapping(self.0 .0 $op rhs);
+    ($name:ident, $op:tt) => {
+        ::paste::paste! {
+            impl<T, U> $name<U> for Wrap<T>
+            where
+                T: $name<U, Output = T>,
+            {
+                type Output = Wrap<T>;
+                fn [<$name:lower>](self, rhs: U) -> Self::Output {
+                    Wrap(Wrapping(self.0 .0 $op rhs))
+                }
             }
         }
     };
 }
 
-wrap_shift!(Shl, shl, ShlAssign, shl_assign, <<);
-wrap_shift!(Shr, shr, ShrAssign, shr_assign, >>);
+macro_rules! wrap_shift_assign {
+    ($name:ident, $op:tt) => {
+        ::paste::paste! {
+            impl<T, U> [<$name Assign>]<U> for Wrap<T>
+            where
+                T: Copy + $name<U, Output = T>,
+            {
+                fn [<$name:lower _assign>](&mut self, rhs: U) {
+                    self.0 = Wrapping(self.0 .0 $op rhs);
+                }
+            }
+        }
+    };
+}
+
+wrap_shift!(Shl, <<);
+wrap_shift!(Shr, >>);
+wrap_shift_assign!(Shl, <<);
+wrap_shift_assign!(Shr, >>);
 
 /// A wrapper around [`std::num::Wrapping<T>`] with ergonomic operator overloading.
 ///
@@ -178,7 +197,20 @@ impl<T> Wrap<T> {
     /// assert_eq!(w.into_inner(), 42u32);
     /// ```
     pub fn into_inner(self) -> T {
-        self.0 .0
+        self.0.0
+    }
+
+    /// Returns a reference to the inner value.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use wrapn::Wrap;
+    /// let w = Wrap::new(42u32);
+    /// assert_eq!(w.raw(), &42u32);
+    /// ```
+    pub fn raw(&self) -> &T {
+        &self.0.0
     }
 }
 
@@ -212,14 +244,26 @@ where
 impl<T: Copy + Num> Neg for Wrap<T> {
     type Output = Wrap<T>;
     fn neg(self) -> Self::Output {
-        Wrap(Wrapping(self.0 .0.wrapping_neg()))
+        Wrap(Wrapping(self.0.0.wrapping_neg()))
     }
 }
 
 impl<T: Copy + Not<Output = T>> Not for Wrap<T> {
     type Output = Wrap<T>;
     fn not(self) -> Self::Output {
-        Wrap(Wrapping(!self.0 .0))
+        Wrap(Wrapping(!self.0.0))
+    }
+}
+
+impl<T: PartialEq> PartialEq<T> for Wrap<T> {
+    fn eq(&self, other: &T) -> bool {
+        self.0.0 == *other
+    }
+}
+
+impl<T: PartialOrd> PartialOrd<T> for Wrap<T> {
+    fn partial_cmp(&self, other: &T) -> Option<std::cmp::Ordering> {
+        self.0.0.partial_cmp(other)
     }
 }
 
@@ -229,10 +273,7 @@ mod tests {
     use crate::wrap;
 
     #[track_caller]
-    fn assert_wrap_eq<T: Copy + Num + std::fmt::Debug + PartialEq>(
-        a: Wrap<T>,
-        b: Wrap<T>,
-    ) {
+    fn assert_wrap_eq<T: Copy + Num + std::fmt::Debug + PartialEq>(a: Wrap<T>, b: Wrap<T>) {
         assert_eq!(a.into_inner(), b.into_inner());
     }
 
@@ -366,6 +407,11 @@ mod tests {
     }
 
     #[test]
+    fn raw() {
+        assert_eq!(Wrap::new(42u32).raw(), &42u32);
+    }
+
+    #[test]
     fn from_conversions() {
         let w: Wrap<u32> = 42u32.into();
         assert_wrap_eq(w, Wrap::new(42u32));
@@ -384,9 +430,23 @@ mod tests {
     }
 
     #[test]
+    fn partial_eq_with_t() {
+        assert!(Wrap::new(5u32) == 5u32);
+        assert!(Wrap::new(5u32) != 3u32);
+    }
+
+    #[test]
     fn partial_ord() {
         assert!(Wrap::new(5u32) < Wrap::new(10u32));
         assert!(Wrap::new(10u32) > Wrap::new(5u32));
+    }
+
+    #[test]
+    fn partial_ord_with_t() {
+        assert!(Wrap::new(5u32) < 10u32);
+        assert!(Wrap::new(5u32) <= 5u32);
+        assert!(Wrap::new(10u32) > 5u32);
+        assert!(Wrap::new(10u32) >= 10u32);
     }
 
     #[test]

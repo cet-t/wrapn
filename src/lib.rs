@@ -33,9 +33,10 @@
 //! - Bitwise: `&`, `|`, `^`, plus assign variants
 //! - Shifts: `<<`, `>>`, plus assign variants
 //! - Unary: `-`, `!`
+//! - Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=` against `T`
 //! - Conversions: `From<T>`, `From<Wrapping<T>>`, `From<Wrap<T>> for Wrapping<T>`
 //! - Traits: `Debug`, `Clone`, `Copy`, `PartialEq`, `Eq`, `PartialOrd`, `Ord`, `Hash`, `Display`
 
 mod macros;
 mod wrap;
-pub use crate::wrap::*;
+pub use wrap::*;
