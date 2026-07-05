@@ -18,6 +18,59 @@ pub trait Num: Copy + Sized {
     fn rotate_right(self, rhs: u32) -> Self;
 }
 
+pub trait CastTo<U>: Sized {
+    fn cast(self) -> U;
+}
+
+macro_rules! cast_to {
+    ($src:ty, $($dst:ty),*) => {
+        $(
+            impl CastTo<$dst> for $src {
+                fn cast(self) -> $dst {
+                    self as $dst
+                }
+            }
+        )*
+    };
+}
+
+cast_to!(
+    u8, u16, u32, u64, u128, usize, i16, i32, i64, i128, isize, f32, f64
+);
+cast_to!(
+    u16, u32, u64, u128, usize, i8, i32, i64, i128, isize, f32, f64
+);
+cast_to!(u32, u64, u128, usize, i8, i16, i64, i128, isize, f32, f64);
+cast_to!(
+    u64, u8, u16, u32, u128, usize, i8, i16, i32, i64, i128, isize, f32, f64
+);
+cast_to!(u128, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+cast_to!(
+    usize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, isize
+);
+cast_to!(
+    i8, u8, u16, u32, u64, u128, usize, i16, i32, i64, i128, isize, f32, f64
+);
+cast_to!(
+    i16, u8, u16, u32, u64, u128, usize, i8, i32, i64, i128, isize, f32, f64
+);
+cast_to!(
+    i32, u8, u16, u32, u64, u128, usize, i8, i16, i64, i128, isize, f32, f64
+);
+cast_to!(
+    i64, u8, u16, u32, u64, u128, usize, i8, i16, i32, i128, isize, f32, f64
+);
+cast_to!(i128, u8, u16, u32, u64, usize, i8, i16, i32, i64, isize);
+cast_to!(
+    isize, u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, usize
+);
+cast_to!(
+    f32, f64, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize
+);
+cast_to!(
+    f64, f32, i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize
+);
+
 macro_rules! num_impl {
     ($($t:ty),* $(,)?) => {
         $(impl Num for $t {
@@ -241,9 +294,9 @@ impl<T> Wrap<T> {
     /// ```
     pub fn cast<U>(self) -> Wrap<U>
     where
-        T: Into<U>,
+        T: CastTo<U>,
     {
-        Wrap::new(self.0.0.into())
+        Wrap::new(self.0.0.cast())
     }
 }
 
@@ -479,6 +532,12 @@ mod tests {
     fn cast_wrap_u32_to_u64() {
         let w: Wrap<u64> = Wrap::new(42u32).cast();
         assert_eq!(w.into_inner(), 42u64);
+    }
+
+    #[test]
+    fn cast_wrap_u64_to_u32() {
+        let w: Wrap<u32> = Wrap::new(42u64).cast();
+        assert_eq!(w.into_inner(), 42u32);
     }
 
     #[test]
