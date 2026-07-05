@@ -479,4 +479,20 @@ mod tests {
         let score = wrap!(10u32);
         assert_eq!(score, Wrap::new(10u32));
     }
+
+    #[test]
+    fn wrap_macro_array_list() {
+        let arr: [Wrap<u32>; 3] = wrap![1u32, 2u32, 3u32];
+        assert_eq!(arr[0].into_inner(), 1u32);
+        assert_eq!(arr[1].into_inner(), 2u32);
+        assert_eq!(arr[2].into_inner(), 3u32);
+    }
+
+    #[test]
+    fn wrap_macro_array_repeat() {
+        let arr: [Wrap<u32>; 3] = wrap![42u32; 3];
+        assert_eq!(arr[0].into_inner(), 42u32);
+        assert_eq!(arr[1].into_inner(), 42u32);
+        assert_eq!(arr[2].into_inner(), 42u32);
+    }
 }

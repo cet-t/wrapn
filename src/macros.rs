@@ -11,4 +11,12 @@ macro_rules! wrap {
     ($val:expr) => {
         $crate::Wrap::new($val)
     };
+
+    ($val:expr; $n:expr) => {
+        [$crate::Wrap::new($val); $n]
+    };
+
+    ($($val:expr),+ $(,)?) => {
+        [$($crate::Wrap::new($val)),+]
+    };
 }
