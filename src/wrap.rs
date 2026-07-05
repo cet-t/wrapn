@@ -217,6 +217,19 @@ impl<T> Wrap<T> {
         &self.0.0
     }
 
+    /// Returns the owned inner value.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use wrapn::Wrap;
+    /// let w = Wrap::new(42u32);
+    /// assert_eq!(w.value(), 42u32);
+    /// ```
+    pub fn value(self) -> T {
+        self.0.0
+    }
+
     /// Casts the inner value to another type, preserving the `Wrap` wrapper.
     ///
     /// # Example
@@ -455,6 +468,11 @@ mod tests {
     #[test]
     fn raw() {
         assert_eq!(Wrap::new(42u32).raw(), &42u32);
+    }
+
+    #[test]
+    fn value() {
+        assert_eq!(Wrap::new(42u32).value(), 42u32);
     }
 
     #[test]
