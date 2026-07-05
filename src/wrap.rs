@@ -14,6 +14,8 @@ pub trait Num: Copy + Sized {
     fn wrapping_div(self, rhs: Self) -> Self;
     fn wrapping_rem(self, rhs: Self) -> Self;
     fn wrapping_neg(self) -> Self;
+    fn rotate_left(self, rhs: u32) -> Self;
+    fn rotate_right(self, rhs: u32) -> Self;
 }
 
 macro_rules! num_impl {
@@ -25,6 +27,8 @@ macro_rules! num_impl {
             fn wrapping_div(self, rhs: Self) -> Self { self.wrapping_div(rhs) }
             fn wrapping_rem(self, rhs: Self) -> Self { self.wrapping_rem(rhs) }
             fn wrapping_neg(self) -> Self { self.wrapping_neg() }
+            fn rotate_left(self, rhs: u32) -> Self { self.rotate_left(rhs) }
+            fn rotate_right(self, rhs: u32) -> Self { self.rotate_right(rhs) }
         })*
     };
 }
@@ -211,6 +215,32 @@ impl<T> Wrap<T> {
     /// ```
     pub fn raw(&self) -> &T {
         &self.0.0
+    }
+}
+
+impl<T: Copy + Num> Wrap<T> {
+    /// Rotates the inner value left by `rhs` bits, keeping wrapping semantics.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use wrapn::Wrap;
+    /// assert_eq!(Wrap::new(0x01u32).rotate_left(3), Wrap::new(0x08u32));
+    /// ```
+    pub fn rotate_left(self, rhs: u32) -> Self {
+        Wrap(Wrapping(self.0.0.rotate_left(rhs)))
+    }
+
+    /// Rotates the inner value right by `rhs` bits, keeping wrapping semantics.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use wrapn::Wrap;
+    /// assert_eq!(Wrap::new(0x08u32).rotate_right(3), Wrap::new(0x01u32));
+    /// ```
+    pub fn rotate_right(self, rhs: u32) -> Self {
+        Wrap(Wrapping(self.0.0.rotate_right(rhs)))
     }
 }
 
@@ -472,6 +502,16 @@ mod tests {
         let mut x = Wrap::new(8u32);
         x >>= 3u32;
         assert_wrap_eq(x, Wrap::new(1u32));
+    }
+
+    #[test]
+    fn rotate_left_wrap() {
+        assert_wrap_eq(Wrap::new(0x01u32).rotate_left(3), Wrap::new(0x08u32));
+    }
+
+    #[test]
+    fn rotate_right_wrap() {
+        assert_wrap_eq(Wrap::new(0x08u32).rotate_right(3), Wrap::new(0x01u32));
     }
 
     #[test]

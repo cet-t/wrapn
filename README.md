@@ -36,6 +36,7 @@ assert_eq!(zeros[0], Wrap::new(0u32));
 - Arithmetic: `+`, `-`, `*`, `/`, `%`, plus assign variants
 - Bitwise: `&`, `|`, `^`, plus assign variants
 - Shifts: `<<`, `>>`, plus assign variants
+- Rotate: `rotate_left(rhs: u32)`, `rotate_right(rhs: u32)`
 - Unary: `-`, `!`
 - Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=` against `T`
 - Conversions: `From<T>`, `From<Wrapping<T>>`, `From<Wrap<T>> for Wrapping<T>`
