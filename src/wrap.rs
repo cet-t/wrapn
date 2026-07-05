@@ -96,12 +96,14 @@ macro_rules! wrap_binary {
         ::paste::paste! {
             impl<T: Copy + Num> [<$name>]<Wrap<T>> for Wrap<T> {
                 type Output = Wrap<T>;
+                #[inline(always)]
                 fn [<$name:lower>](self, rhs: Wrap<T>) -> Self::Output {
                     Wrap(Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs.0 .0)))
                 }
             }
             impl<T: Copy + Num> [<$name>]<T> for Wrap<T> {
                 type Output = Wrap<T>;
+                #[inline(always)]
                 fn [<$name:lower>](self, rhs: T) -> Self::Output {
                     Wrap(Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs)))
                 }
@@ -114,11 +116,13 @@ macro_rules! wrap_binary_assign {
     ($name:ident) => {
         ::paste::paste! {
             impl<T: Copy + Num> [<$name Assign>]<Wrap<T>> for Wrap<T> {
+                #[inline(always)]
                 fn [<$name:lower _assign>](&mut self, rhs: Wrap<T>) {
                     self.0 = Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs.0 .0));
                 }
             }
             impl<T: Copy + Num> [<$name Assign>]<T> for Wrap<T> {
+                #[inline(always)]
                 fn [<$name:lower _assign>](&mut self, rhs: T) {
                     self.0 = Wrapping(self.0 .0.[< wrapping_ $name:lower >](rhs));
                 }
@@ -144,12 +148,14 @@ macro_rules! wrap_bit_binary {
         ::paste::paste! {
             impl<T: Copy + $name<Output = T>> $name<Wrap<T>> for Wrap<T> {
                 type Output = Wrap<T>;
+                #[inline(always)]
                 fn [<$name:lower>](self, rhs: Wrap<T>) -> Self::Output {
                     Wrap(Wrapping(self.0 .0 $op rhs.0 .0))
                 }
             }
             impl<T: Copy + $name<Output = T>> $name<T> for Wrap<T> {
                 type Output = Wrap<T>;
+                #[inline(always)]
                 fn [<$name:lower>](self, rhs: T) -> Self::Output {
                     Wrap(Wrapping(self.0 .0 $op rhs))
                 }
@@ -162,11 +168,13 @@ macro_rules! wrap_bit_binary_assign {
     ($name:ident, $op:tt) => {
         ::paste::paste! {
             impl<T: Copy + $name<Output = T>> [<$name Assign>]<Wrap<T>> for Wrap<T> {
+                #[inline(always)]
                 fn [<$name:lower _assign>](&mut self, rhs: Wrap<T>) {
                     self.0 = Wrapping(self.0 .0 $op rhs.0 .0);
                 }
             }
             impl<T: Copy + $name<Output = T>> [<$name Assign>]<T> for Wrap<T> {
+                #[inline(always)]
                 fn [<$name:lower _assign>](&mut self, rhs: T) {
                     self.0 = Wrapping(self.0 .0 $op rhs);
                 }
@@ -191,6 +199,7 @@ macro_rules! wrap_shift {
                 T: $name<U, Output = T>,
             {
                 type Output = Wrap<T>;
+                #[inline(always)]
                 fn [<$name:lower>](self, rhs: U) -> Self::Output {
                     Wrap(Wrapping(self.0 .0 $op rhs))
                 }
@@ -206,6 +215,7 @@ macro_rules! wrap_shift_assign {
             where
                 T: Copy + $name<U, Output = T>,
             {
+                #[inline(always)]
                 fn [<$name:lower _assign>](&mut self, rhs: U) {
                     self.0 = Wrapping(self.0 .0 $op rhs);
                 }
@@ -240,58 +250,27 @@ impl<T> Wrap<T> {
     /// use wrapn::Wrap;
     /// let w = Wrap::new(42u32);
     /// ```
+    #[inline(always)]
     pub fn new(value: T) -> Self {
         Wrap(Wrapping(value))
     }
 
-    /// Consumes the `Wrap<T>` and returns the inner value.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use wrapn::Wrap;
-    /// let w = Wrap::new(42u32);
-    /// assert_eq!(w.into_inner(), 42u32);
-    /// ```
+    #[inline(always)]
     pub fn into_inner(self) -> T {
         self.0.0
     }
 
-    /// Returns a reference to the inner value.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use wrapn::Wrap;
-    /// let w = Wrap::new(42u32);
-    /// assert_eq!(w.raw(), &42u32);
-    /// ```
+    #[inline(always)]
     pub fn raw(&self) -> &T {
         &self.0.0
     }
 
-    /// Returns the owned inner value.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use wrapn::Wrap;
-    /// let w = Wrap::new(42u32);
-    /// assert_eq!(w.value(), 42u32);
-    /// ```
+    #[inline(always)]
     pub fn value(self) -> T {
         self.0.0
     }
 
-    /// Casts the inner value to another type, preserving the `Wrap` wrapper.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use wrapn::Wrap;
-    /// let w = Wrap::new(42u32);
-    /// assert_eq!(w.cast::<u64>(), Wrap::new(42u64));
-    /// ```
+    #[inline(always)]
     pub fn cast<U>(self) -> Wrap<U>
     where
         T: CastTo<U>,
@@ -309,6 +288,7 @@ impl<T: Copy + Num> Wrap<T> {
     /// use wrapn::Wrap;
     /// assert_eq!(Wrap::new(0x01u32).rotate_left(3), Wrap::new(0x08u32));
     /// ```
+    #[inline(always)]
     pub fn rotate_left(self, rhs: u32) -> Self {
         Wrap(Wrapping(self.0.0.rotate_left(rhs)))
     }
@@ -321,24 +301,28 @@ impl<T: Copy + Num> Wrap<T> {
     /// use wrapn::Wrap;
     /// assert_eq!(Wrap::new(0x08u32).rotate_right(3), Wrap::new(0x01u32));
     /// ```
+    #[inline(always)]
     pub fn rotate_right(self, rhs: u32) -> Self {
         Wrap(Wrapping(self.0.0.rotate_right(rhs)))
     }
 }
 
 impl<T> From<T> for Wrap<T> {
+    #[inline(always)]
     fn from(value: T) -> Self {
         Wrap::new(value)
     }
 }
 
 impl<T> From<Wrapping<T>> for Wrap<T> {
+    #[inline(always)]
     fn from(w: Wrapping<T>) -> Self {
         Wrap(w)
     }
 }
 
 impl<T> From<Wrap<T>> for Wrapping<T> {
+    #[inline(always)]
     fn from(w: Wrap<T>) -> Self {
         w.0
     }
@@ -355,6 +339,7 @@ where
 
 impl<T: Copy + Num> Neg for Wrap<T> {
     type Output = Wrap<T>;
+    #[inline(always)]
     fn neg(self) -> Self::Output {
         Wrap(Wrapping(self.0.0.wrapping_neg()))
     }
@@ -362,18 +347,21 @@ impl<T: Copy + Num> Neg for Wrap<T> {
 
 impl<T: Copy + Not<Output = T>> Not for Wrap<T> {
     type Output = Wrap<T>;
+    #[inline(always)]
     fn not(self) -> Self::Output {
         Wrap(Wrapping(!self.0.0))
     }
 }
 
 impl<T: PartialEq> PartialEq<T> for Wrap<T> {
+    #[inline(always)]
     fn eq(&self, other: &T) -> bool {
         self.0.0 == *other
     }
 }
 
 impl<T: PartialOrd> PartialOrd<T> for Wrap<T> {
+    #[inline(always)]
     fn partial_cmp(&self, other: &T) -> Option<std::cmp::Ordering> {
         self.0.0.partial_cmp(other)
     }
