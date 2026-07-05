@@ -216,6 +216,22 @@ impl<T> Wrap<T> {
     pub fn raw(&self) -> &T {
         &self.0.0
     }
+
+    /// Casts the inner value to another type, preserving the `Wrap` wrapper.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use wrapn::Wrap;
+    /// let w = Wrap::new(42u32);
+    /// assert_eq!(w.cast::<u64>(), Wrap::new(42u64));
+    /// ```
+    pub fn cast<U>(self) -> Wrap<U>
+    where
+        T: Into<U>,
+    {
+        Wrap::new(self.0.0.into())
+    }
 }
 
 impl<T: Copy + Num> Wrap<T> {
@@ -439,6 +455,18 @@ mod tests {
     #[test]
     fn raw() {
         assert_eq!(Wrap::new(42u32).raw(), &42u32);
+    }
+
+    #[test]
+    fn cast_wrap_u32_to_u64() {
+        let w: Wrap<u64> = Wrap::new(42u32).cast();
+        assert_eq!(w.into_inner(), 42u64);
+    }
+
+    #[test]
+    fn cast_wrap_i32_to_i64() {
+        let w: Wrap<i64> = Wrap::new(42i32).cast();
+        assert_eq!(w.into_inner(), 42i64);
     }
 
     #[test]
